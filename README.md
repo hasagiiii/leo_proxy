@@ -1,15 +1,17 @@
 # LEO Proxy
 
-> 🔥 Leonardo 视频生成 API 网关：Token 池自动调度 + JWT 自动保活 + OpenAI 风格接口，支持 Seedance 2.0 / Sora 2 / Kling O3 / MiniMax H3
+> 🔥 Leonardo Web/API 任务网关：账号池调度 + Cookie ZIP 导入 + Token/JWT 协议续签 + 统一 JSON 任务接口，覆盖视频、图片与音频生成。
 
 ## About
 
-LEO Proxy 是面向 Leonardo 上游的 Web/API 图片与视频任务控制台，提供统一的任务提交、状态轮询、账号调度、积分结算和媒体结果管理能力。核心关键词：
+LEO Proxy 是围绕 Leonardo 上游构建的 Web/API 任务网关与运营控制台。它把账号池、任务队列、模型请求、积分结算和媒体结果收敛到同一套服务中，当前项目能力如下：
 
-- Leonardo 视频生成 API 网关
-- Token 池自动调度与 JWT 自动保活
-- OpenAI 风格的任务接口
-- Seedance 2.0、Sora 2、Kling O3、MiniMax H3
+- **账号与会话**：Cookie ZIP 批量导入、Token/JWT 有效期管理、协议续签队列、余额同步、并发额度和账号状态监控。
+- **视频生成**：MiniMax Hailuo H3（`hailuo-03`）、Seedance 2.0 系列（`seedance-2.0`、`seedance-2.0-mini`、`seedance-2.0-fast`）、Seedance 2.5（`bytedance/seedance-2.5`）、Kling O3（`kling-video-o-3`）、Gemini Omni Flash（`gemini-omni-flash`）、Veo 3.1 系列（`veo-3.1-generate-001`、`veo-3.1-fast-generate-001`、`veo-3.1-lite`）。
+- **图片生成**：GPT Image 2（`gpt-image-2`）、Nano Banana 2（`nano-banana-2`）、Nano Banana Pro（`nano-banana-pro`），支持文生图和参考图编辑。
+- **音频生成**：Seed Audio 1.0（`seed-audio-1.0`），支持文字转语音和音色、速度、音量、音调参数。
+- **统一任务 API**：`POST /v1/tasks` 提交任务，`GET /v1/tasks/{task_uuid}` 查询状态，支持幂等键、媒体输入、任务进度、实际积分和结果媒体地址。
+- **Web 控制台**：运行总览、账号池、任务中心、模型接入四个页面，并提供 API 鉴权、Basic Auth 和 `/api` 反向代理。
 
 项目提供 Web 页面和 API 服务，不包含桌面客户端；后台任务组件和 MySQL 为 API 的运行依赖。
 
