@@ -1,0 +1,118 @@
+name: leo-proxy
+
+x-service-env: &service-env
+  VIDEO_SERVICE_MYSQL_DSN: mysql+aiomysql://leo_proxy:leo_proxy@mysql:3306/leo_proxy?charset=utf8mb4
+  VIDEO_SERVICE_API_AUTH_KEY: ${LEO_PROXY_API_KEY:-leo-proxy-api-key}
+  VIDEO_SERVICE_ADMIN_AUTH_KEY: ${LEO_PROXY_ADMIN_KEY:-leo-proxy-admin-key}
+  VIDEO_SERVICE_LOGIN_WORKER_AUTH_KEY: disabled-no-desktop-client
+  VIDEO_SERVICE_CREDENTIAL_MASTER_KEY: ${LEO_PROXY_CREDENTIAL_MASTER_KEY:-bG9jYWwtdmlkZW8tdGFzay1tYXN0ZXIta2V5LTAwMDE=}
+  VIDEO_SERVICE_UPSTREAM_MODE: ${LEO_PROXY_UPSTREAM_MODE:-leonardo}
+  VIDEO_SERVICE_LEONARDO_SCHEMA_VERSION: ${LEO_PROXY_LEONARDO_SCHEMA_VERSION:-latest}
+  VIDEO_SERVICE_LOW_BALANCE_THRESHOLD: "1"
+  VIDEO_SERVICE_TOKEN_GUARD_SECONDS: "120"
+  VIDEO_SERVICE_ACCOUNT_MAX_CONCURRENCY: "3"
+  VIDEO_SERVICE_WORKER_CONCURRENCY: "4"
+  VIDEO_SERVICE_MEDIA_RESOLUTION_CONCURRENCY: "2"
+  VIDEO_SERVICE_QUEUE_LEASE_SECONDS: "30"
+  VIDEO_SERVICE_SYNC_BATCH_SIZE: "10"
+  VIDEO_SERVICE_SYNC_INTERVAL_SECONDS: "1"
+  VIDEO_SERVICE_COOKIE_IMPORT_BATCH_SIZE: "2"
+  VIDEO_SERVICE_COOKIE_IMPORT_POLL_SECONDS: "1"
+  VIDEO_SERVICE_COOKIE_IMPORT_LEASE_SECONDS: "120"
+  VIDEO_SERVICE_COOKIE_IMPORT_MAX_ATTEMPTS: "3"
+  VIDEO_SERVICE_TASK_RUNNING_TIMEOUT_SECONDS: "7200"
+  VIDEO_SERVICE_ACCOUNT_MAINTENANCE_SECONDS: "1"
+  VIDEO_SERVICE_LOGIN_ACTIVE_CREDIT_TARGET: "1000000"
+  VIDEO_SERVICE_PROTOCOL_RENEWAL_ENABLED: "true"
+  VIDEO_SERVICE_PROTOCOL_RENEWAL_BROWSER_PROFILE: "chrome136"
+  VIDEO_SERVICE_PROTOCOL_RENEWAL_CROSS_ORIGIN_COOKIE_ENABLED: "false"
+  VIDEO_SERVICE_PROTOCOL_RENEWAL_BATCH_SIZE: "2"
+  VIDEO_SERVICE_PROTOCOL_RENEWAL_HEARTBEAT_SECONDS: "15"
+
+x-api-service: &api-service
+  build:
+    context: ./api
+  environment: *service-env
+  restart: unless-stopped
+
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: leo_proxy
+      MYSQL_USER: leo_proxy
+      MYSQL_PASSWORD: leo_proxy
+      MYSQL_ROOT_PASSWORD: ${LEO_PROXY_MYSQL_ROOT_PASSWORD:-leo-proxy-local-root}
+      TZ: UTC
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_0900_ai_ci"]
+    ports:
+      - "${LEO_PROXY_MYSQL_PORT:-23306}:3306"
+    volumes:
+      - leo-proxy-mysql:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uleo_proxy -pleo_proxy --silent"]
+      interval: 2s
+      timeout: 3s
+      retries: 40
+      start_period: 10s
+    restart: unless-stopped
+
+  migrate:
+    <<: *api-service
+    command: ["alembic", "upgrade", "head"]
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: "no"
+
+  api:
+    <<: *api-service
+    command: ["uvicorn", "video_task_service.api.main:app", "--host", "0.0.0.0", "--port", "8080"]
+    ports:
+      - "${LEO_PROXY_API_PORT:-28080}:8080"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health/ready', timeout=2)"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+
+  worker:
+    <<: *api-service
+    command: ["python", "-m", "video_task_service.worker"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  syncer:
+    <<: *api-service
+    command: ["python", "-m", "video_task_service.syncer"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  web:
+    build:
+      context: ./web
+    environment:
+      CONSOLE_AUTH_USERNAME: ${LEO_PROXY_CONSOLE_USER:-admin}
+      CONSOLE_AUTH_PASSWORD: ${LEO_PROXY_CONSOLE_PASSWORD:-leo-proxy-local}
+      UI_API_BASE: /api
+      UI_BOOTSTRAP_API_KEY: ${LEO_PROXY_API_KEY:-leo-proxy-api-key}
+      UI_BOOTSTRAP_ADMIN_KEY: ${LEO_PROXY_ADMIN_KEY:-leo-proxy-admin-key}
+    ports:
+      - "${LEO_PROXY_WEB_PORT:-28081}:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://127.0.0.1/console-health"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+volumes:
+  leo-proxy-mysql:

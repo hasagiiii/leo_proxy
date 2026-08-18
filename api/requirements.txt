@@ -1,0 +1,16 @@
+alembic>=1.14,<2
+aiomysql>=0.2,<1
+av>=14,<17
+cryptography>=44,<46
+curl-cffi>=0.16,<0.17
+fastapi>=0.115,<1
+httpx>=0.28,<1
+pillow>=11,<13
+python-multipart>=0.0.20,<0.1
+mypy>=1.14,<2
+pydantic-settings>=2.7,<3
+pytest>=8.3,<9
+pytest-asyncio>=0.25,<1
+ruff>=0.9,<1
+sqlalchemy>=2.0.36,<3
+uvicorn[standard]>=0.34,<1

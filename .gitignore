@@ -1,0 +1,12 @@
+.env
+.secrets/
+.evidence/
+api/.venv*/
+api/**/__pycache__/
+api/.pytest_cache/
+api/.ruff_cache/
+api/src/*.egg-info/
+web/node_modules/
+web/dist/
+*.tsbuildinfo
+.DS_Store

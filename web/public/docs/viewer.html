@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FRAME OPS · 接入文档</title>
+    <style>
+      :root { color-scheme: dark; font-family: Inter, "PingFang SC", "Microsoft YaHei", sans-serif; background: #0b100d; color: #eef4ed; }
+      * { box-sizing: border-box; }
+      body { margin: 0; min-height: 100vh; background: radial-gradient(circle at 80% 0%, #172419 0, #0b100d 42%); }
+      header { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 24px; border-bottom: 1px solid #29342b; background: rgba(11, 16, 13, .94); backdrop-filter: blur(12px); }
+      header strong { letter-spacing: .08em; }
+      nav { display: flex; gap: 10px; }
+      a { display: inline-flex; min-height: 36px; align-items: center; padding: 0 14px; border: 1px solid #3a493d; border-radius: 8px; color: #dfe9dc; text-decoration: none; font-size: 13px; }
+      a:hover { border-color: #c8ff72; color: #c8ff72; }
+      main { width: min(1120px, calc(100% - 32px)); margin: 28px auto 64px; }
+      .meta { margin-bottom: 14px; color: #8fa092; font: 12px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace; }
+      pre { min-height: 240px; margin: 0; padding: clamp(18px, 3vw, 36px); overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; border: 1px solid #29342b; border-radius: 14px; background: #101712; box-shadow: 0 20px 60px rgba(0, 0, 0, .22); color: #e7eee5; font: 14px/1.75 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+      .error { color: #ff9b91; }
+      @media (max-width: 640px) { header { align-items: flex-start; flex-direction: column; } main { width: min(100% - 20px, 1120px); margin-top: 14px; } }
+    </style>
+  </head>
+  <body>
+    <header>
+      <strong>FRAME OPS / MARKDOWN VIEWER</strong>
+      <nav>
+        <a href="/" aria-label="返回 FRAME OPS">返回控制台</a>
+        <a id="download" href="#" download>下载 .md</a>
+      </nav>
+    </header>
+    <main>
+      <div class="meta" id="meta">正在加载文档…</div>
+      <pre id="content" aria-live="polite">正在加载文档…</pre>
+    </main>
+    <script>
+      const documents = new Map([
+        ["HAILUO_H3_API.md", "MiniMax Hailuo H3 视频任务接入文档"],
+        ["seedance-2-request-guide.md", "Seedance 2.0 系列 API 请求指南"],
+        ["seedance-2.5-request-guide.md", "Seedance 2.5 API 请求指南"],
+        ["seedance-2.5-local-verification.md", "Seedance 2.5 本地接入验收记录"],
+        ["kling-video-o3-request-guide.md", "Kling Video O3 Omni API 请求指南"],
+        ["gpt-image-2-request-guide.md", "GPT Image 2 API 请求指南"],
+        ["nano-image-request-guide.md", "Nano Banana 2 / Pro API 请求指南"],
+        ["nano-image-smoke-report.md", "Nano Banana 2 / Pro 冒烟测试报告"],
+        ["gemini-omni-flash-request-guide.md", "Gemini Omni Flash API 请求指南"],
+        ["gemini-omni-flash-smoke-report.md", "Gemini Omni Flash 线上真实测试报告"],
+        ["veo-3.1-request-guide.md", "Veo 3.1 API 请求指南"],
+        ["veo-3.1-smoke-report.md", "Veo 3.1 线上真实任务与接口审计报告"],
+        ["veo-3.1-fast-request-guide.md", "Veo 3.1 Fast API 请求指南"],
+        ["veo-3.1-lite-request-guide.md", "Veo 3.1 Lite API 请求指南"],
+        ["veo-3.1-lite-smoke-report.md", "Veo 3.1 Lite 线上真实测试报告"],
+        ["seed-audio-1-request-guide.md", "Seed Audio 1.0 API 请求指南"],
+        ["seed-audio-1-smoke-report.md", "Seed Audio 1.0 线上真实测试报告"],
+      ]);
+      const params = new URLSearchParams(window.location.search);
+      const documentName = params.get("doc") || "";
+      const title = documents.get(documentName);
+      const meta = document.querySelector("#meta");
+      const content = document.querySelector("#content");
+      const download = document.querySelector("#download");
+
+      if (!title) {
+        document.title = "文档不存在 · FRAME OPS";
+        meta.textContent = "DOCUMENT_NOT_FOUND";
+        content.textContent = "未找到指定文档。";
+        content.classList.add("error");
+        download.hidden = true;
+      } else {
+        const source = `./${documentName}`;
+        document.title = `${title} · FRAME OPS`;
+        meta.textContent = `${title} / ${documentName}`;
+        download.href = source;
+        fetch(source, { cache: "no-store" })
+          .then((response) => {
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            return response.text();
+          })
+          .then((markdown) => { content.textContent = markdown; })
+          .catch((error) => {
+            content.textContent = `文档加载失败：${error.message}`;
+            content.classList.add("error");
+          });
+      }
+    </script>
+  </body>
+</html>

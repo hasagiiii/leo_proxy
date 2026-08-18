@@ -1,0 +1,56 @@
+[build-system]
+requires = ["setuptools>=75", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "video-task-service"
+version = "0.1.0"
+description = "MySQL-backed account pool and asynchronous video task service"
+requires-python = ">=3.12"
+dependencies = [
+  "alembic>=1.14,<2",
+  "aiomysql>=0.2,<1",
+  "av>=14,<17",
+  "cryptography>=44,<46",
+  "curl-cffi>=0.16,<0.17",
+  "fastapi>=0.115,<1",
+  "httpx>=0.28,<1",
+  "pillow>=11,<13",
+  "python-multipart>=0.0.20,<0.1",
+  "pydantic-settings>=2.7,<3",
+  "sqlalchemy>=2.0.36,<3",
+  "uvicorn[standard]>=0.34,<1",
+]
+
+[project.optional-dependencies]
+dev = [
+  "mypy>=1.14,<2",
+  "pytest>=8.3,<9",
+  "pytest-asyncio>=0.25,<1",
+  "ruff>=0.9,<1",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+filterwarnings = [
+  "ignore:Using `httpx` with `starlette.testclient` is deprecated.*:starlette.exceptions.StarletteDeprecationWarning",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.per-file-ignores]
+"scripts/smoke_test.py" = ["UP017"]
+
+[tool.mypy]
+python_version = "3.12"
+plugins = ["pydantic.mypy"]
+strict = true
