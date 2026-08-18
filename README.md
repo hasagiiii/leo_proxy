@@ -1,13 +1,17 @@
 # LEO Proxy
 
-LEO Proxy 是从 FRAME OPS 中独立迁移出来的 Web/API 图片与视频任务控制台，只保留：
+> 🔥 Leonardo 视频生成 API 网关：Token 池自动调度 + JWT 自动保活 + OpenAI 风格接口，支持 Seedance 2.0 / Sora 2 / Kling O3 / MiniMax H3
 
-- 运行总览
-- 账号池与 Cookie ZIP 导入
-- 任务中心
-- 模型接入文档
+## About
 
-项目不包含 Electron、Tauri 或其他桌面客户端。`worker`、`syncer` 和 `migrate` 是 API
+LEO Proxy 是面向 Leonardo 上游的 Web/API 图片与视频任务控制台，提供统一的任务提交、状态轮询、账号调度、积分结算和媒体结果管理能力。核心关键词：
+
+- Leonardo 视频生成 API 网关
+- Token 池自动调度与 JWT 自动保活
+- OpenAI 风格的任务接口
+- Seedance 2.0、Sora 2、Kling O3、MiniMax H3
+
+项目提供 Web 页面和 API 服务，不包含桌面客户端。`worker`、`syncer` 和 `migrate` 是 API
 的后台组件，MySQL 是运行依赖。
 
 交流群：[加入 Telegram 交流群](https://t.me/+x3r78uCRo5lmOTU9)
@@ -220,7 +224,7 @@ npm --prefix web run build
 npm --prefix web audit --omit=dev
 ```
 
-最近一次迁移验收结果：API `1199 passed`、Web `41 passed`、生产依赖审计 0 漏洞；详见
+最近一次本地验证结果：API `1199 passed`、Web `42 passed`、生产依赖审计 0 漏洞；详见
 [测试报告](docs/test-report-2026-08-18.md)。
 
 ## 日常运维
@@ -249,9 +253,9 @@ docker compose down
 
 ## 相关文档
 
-- [架构与迁移边界](docs/architecture.md)
+- [架构说明](docs/architecture.md)
 - [本地运行与运维说明](docs/operations.md)
-- [2026-08-18 迁移验收测试报告](docs/test-report-2026-08-18.md)
+- [2026-08-18 测试报告](docs/test-report-2026-08-18.md)
 
 当前 README 面向本地安装与验收。生产部署前必须替换所有默认密钥和密码，并单独确定正式域名、TLS、公开端口、部署路径及备份策略。
 
