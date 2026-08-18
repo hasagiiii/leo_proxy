@@ -15,7 +15,7 @@ LEO Proxy 是围绕 Leonardo 上游构建的 Web/API 任务网关与运营控制
 
 项目提供 Web 页面和 API 服务，不包含桌面客户端；后台任务组件和 MySQL 为 API 的运行依赖。
 
-交流群：[加入 Telegram 交流群](https://t.me/+x3r78uCRo5lmOTU9)
+交流群：[加入 Telegram 交流群](https://t.me/lowbcc)
 
 ## 页面预览
 

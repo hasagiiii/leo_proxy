@@ -103,7 +103,7 @@ import type {
 } from "./types";
 
 const PAGE_SIZE = 12;
-const TELEGRAM_COMMUNITY_URL = "https://t.me/+x3r78uCRo5lmOTU9";
+const TELEGRAM_COMMUNITY_URL = "https://t.me/lowbcc";
 const DASHBOARD_PERIODS: Array<{ value: DashboardPeriod; label: string; code: string; note: string }> = [
   { value: "total", label: "总数", code: "ALL TIME", note: "完整历史累计" },
   { value: "today", label: "当天", code: "TODAY", note: "本地自然日" },
