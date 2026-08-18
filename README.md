@@ -11,8 +11,7 @@ LEO Proxy 是面向 Leonardo 上游的 Web/API 图片与视频任务控制台，
 - OpenAI 风格的任务接口
 - Seedance 2.0、Sora 2、Kling O3、MiniMax H3
 
-项目提供 Web 页面和 API 服务，不包含桌面客户端。`worker`、`syncer` 和 `migrate` 是 API
-的后台组件，MySQL 是运行依赖。
+项目提供 Web 页面和 API 服务，不包含桌面客户端；后台任务组件和 MySQL 为 API 的运行依赖。
 
 交流群：[加入 Telegram 交流群](https://t.me/+x3r78uCRo5lmOTU9)
 
