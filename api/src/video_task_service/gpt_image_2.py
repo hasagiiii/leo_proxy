@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Mapping
 from typing import Any
 
 from video_task_service.h3 import ResolvedMedia
@@ -39,6 +40,28 @@ def gpt_image_2_resolution(aspect_ratio: str, size: str) -> str:
     return f"{width}x{height}"
 
 
+def resolve_gpt_image_2_dimensions(task_input: Mapping[str, Any]) -> tuple[int, int]:
+    supplied_width = task_input.get("width")
+    supplied_height = task_input.get("height")
+    if supplied_width is not None or supplied_height is not None:
+        if supplied_width is None or supplied_height is None:
+            raise ValueError("GPT Image 2 width and height must be provided together")
+        if (
+            isinstance(supplied_width, bool)
+            or not isinstance(supplied_width, int)
+            or isinstance(supplied_height, bool)
+            or not isinstance(supplied_height, int)
+            or supplied_width <= 0
+            or supplied_height <= 0
+        ):
+            raise ValueError("GPT Image 2 width and height must be positive integers")
+        return supplied_width, supplied_height
+
+    size = str(task_input.get("size", "SMALL")).upper()
+    aspect_ratio = str(task_input.get("aspect_ratio", "1:1"))
+    return gpt_image_2_dimensions(aspect_ratio, size)
+
+
 def build_leonardo_gpt_image_2_request(
     *,
     model: str,
@@ -55,14 +78,15 @@ def build_leonardo_gpt_image_2_request(
     quality = str(task_input.get("quality", "MEDIUM")).upper()
     if quality not in {"LOW", "MEDIUM", "HIGH"}:
         raise ValueError(f"unsupported GPT Image 2 quality: {quality}")
-    size = str(task_input.get("size", "SMALL")).upper()
-    aspect_ratio = str(task_input.get("aspect_ratio", "1:1"))
-    width, height = gpt_image_2_dimensions(aspect_ratio, size)
+    has_explicit_dimensions = (
+        task_input.get("width") is not None or task_input.get("height") is not None
+    )
+    width, height = resolve_gpt_image_2_dimensions(task_input)
     expected_resolution = f"{width}x{height}"
     supplied_resolution = str(task_input.get("resolution", expected_resolution)).replace(
         "×", "x"
     )
-    if supplied_resolution != expected_resolution:
+    if not has_explicit_dimensions and supplied_resolution != expected_resolution:
         raise ValueError(
             "GPT Image 2 resolution must match the selected aspect_ratio and size"
         )

@@ -61,10 +61,12 @@ Worker 固定写入以下上游参数，业务请求不能覆盖：
 | `quality` | enum | 否 | `MEDIUM` | `LOW` / `MEDIUM` / `HIGH` |
 | `aspect_ratio` | enum | 否 | `1:1` | `21:9` / `16:9` / `3:2` / `4:3` / `5:4` / `1:1` / `4:5` / `3:4` / `2:3` / `9:16` |
 | `size` | enum | 否 | `SMALL` | `SMALL` / `MEDIUM` / `LARGE` |
-| `resolution` | string | 否 | 自动推导 | `WIDTHxHEIGHT`；若传入，必须与 `aspect_ratio + size` 对应 |
+| `resolution` | string | 否 | 自动推导 | `WIDTHxHEIGHT`；未传 `width`/`height` 时必须与 `aspect_ratio + size` 对应 |
+| `width` | integer | 否 | 自动推导 | 必须与 `height` 一起传；显式传入时优先于 `aspect_ratio`、`size` 和 `resolution` |
+| `height` | integer | 否 | 自动推导 | 必须与 `width` 一起传；显式传入时优先于 `aspect_ratio`、`size` 和 `resolution` |
 | `reference_image_urls` | URL[] | 图生图必填 | — | 1–6 个公网 HTTP(S) PNG/JPG/WEBP 地址 |
 
-服务会把选定的 `aspect_ratio + size` 解析成精确 `resolution`，将该值写回任务 `input`，再向上游发送 `width` 与 `height`。
+显式传入 `width + height` 时，服务直接使用这组像素尺寸，并将对应 `resolution` 写回任务 `input`；此时不再根据 `aspect_ratio + size` 推导尺寸。未传显式宽高时，服务继续把选定的 `aspect_ratio + size` 解析成精确 `resolution`，再向上游发送 `width` 与 `height`。
 
 ## 3. 尺寸与积分矩阵
 

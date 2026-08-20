@@ -132,6 +132,46 @@ def test_gpt_image_2_rejects_resolution_that_conflicts_with_size() -> None:
         )
 
 
+def test_gpt_image_2_explicit_dimensions_override_size_and_resolution() -> None:
+    task = TaskCreate(
+        model="gpt-image-2",
+        task_type="IMAGE_GENERATION",
+        mode="text-to-image",
+        input={
+            "prompt": "test",
+            "aspect_ratio": "1:1",
+            "size": "SMALL",
+            "resolution": "1024x1024",
+            "width": 1536,
+            "height": 1024,
+        },
+    )
+
+    assert task.input_document()["resolution"] == "1536x1024"
+    request = build_leonardo_gpt_image_2_request(
+        model="gpt-image-2",
+        mode="text-to-image",
+        task_input={
+            **task.input_document(),
+            "resolution": "1024x1024",
+        },
+        assets=[],
+    )
+    assert request["parameters"]["width"] == 1536
+    assert request["parameters"]["height"] == 1024
+
+
+@pytest.mark.parametrize("field", ["width", "height"])
+def test_gpt_image_2_requires_explicit_dimensions_together(field: str) -> None:
+    with pytest.raises(ValidationError, match="width and height must be provided together"):
+        TaskCreate(
+            model="gpt-image-2",
+            task_type="IMAGE_GENERATION",
+            mode="text-to-image",
+            input={"prompt": "test", field: 1024},
+        )
+
+
 def test_gpt_image_2_image_mode_builds_six_ordered_references() -> None:
     urls = [f"https://cdn.example.com/reference-{index}.png" for index in range(6)]
     task = TaskCreate(

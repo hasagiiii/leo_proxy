@@ -1452,9 +1452,17 @@ class GPTImage2InputBase(BaseModel):
     aspect_ratio: GPTImage2AspectRatio = "1:1"
     size: GPTImage2Size = "SMALL"
     resolution: str | None = Field(default=None, pattern=r"^\d{3,4}[x×]\d{3,4}$")
+    width: int | None = Field(default=None, gt=0, le=9999)
+    height: int | None = Field(default=None, gt=0, le=9999)
 
     @model_validator(mode="after")
     def validate_and_resolve_dimensions(self) -> GPTImage2InputBase:
+        if self.width is not None or self.height is not None:
+            if self.width is None or self.height is None:
+                raise ValueError("width and height must be provided together")
+            self.resolution = f"{self.width}x{self.height}"
+            return self
+
         expected = gpt_image_2_resolution(self.aspect_ratio, self.size)
         if self.resolution is not None and self.resolution.replace("×", "x") != expected:
             raise ValueError("resolution must match the selected GPT Image 2 aspect_ratio and size")
